@@ -1,0 +1,130 @@
+---
+title: "Stat Inf HW4"
+## author: "Richard Decal"
+## date: "November 3, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## complete the following problems. Use R for any calculations/simulations. You can use LaTeX for any equations or you may write the equations by hand, scan them in, and include them in your document.
+
+# 1. Of the 213 countries or independent economies in the world recognized by the World Bank, 19% are classified by the World Bank as being developed. Are countries with a large land area (>500,000 km2) more likely to be developed? 23% of all countries are large, and 17% of all countries are both large and developed. Use D to denote the event of a country being developed and L to denote a country being large.
+$P(L) = 0.23$
+
+$P(L\cap D) = 0.17$
+
+$P(D) = 0.19$
+
+## a. What is the probability that a country is either large or developed?
+
+$P(L) +P(D) -P(L\cap D) = 0.23 + 0.19 - 0.17 = 0.25$
+
+## b. What is the probability that a large country is developed? Compare this to the probability that any country is developed.
+
+$\frac{P(D\cap L)}{P(L)} = 0.17/0.23 = 0.74$
+
+## c. What is the probability that a developed country is large? Compare this to the probability that any country is large.
+
+$\frac{P(D\cap L)}{P(D)} = 0.17/0.19 = 0.89$
+
+## d. In terms of countries, what would it mean to say that D and L are disjoint events? Are they disjoint?
+
+It would mean that being developed and being large are mutually exclusive conditions. Since there are countries that are both, the sets are not disjoint.
+
+## e. In terms of countries, what would it mean to say that D and L are independent events? Are they independent?
+
+It would mean that the conditional probability of being developed is totally unaffected by the prior knowledge that the country is also large (and vice versa). Since there is a large overlap between the two sets, this is not true.
+
+# 2. A certain river floods every year. Suppose that the low-water mark is set at 1 and the high water mark Y has distribution function $F_Y(y)=P(Y \leq y) =1 - \frac{1}{y^2}, 1 \leq y \leq \infty$
+## a. Verify that F is a cdf.
+
+## b. Find the pdf.
+I do not know how todo this
+
+# 3. Suppose X and Y are two random variables with E(X) = 5, Var(X) = 1, E(Y) = 11, Var(Y) = 4. 
+## a. Find the covariance between X and Y if they are independent.
+TODO don't know
+
+## b. Find the variance of 2X + 3Y if they are independent.
+$$Var(2x+3Y)=Var(2x)+Var(3y)\\
+= 2^2Var(x) + 3^2 Var(y)\\
+=4*1 + 9*4 = 40$$
+
+## c. Find the covariance between X and Y if corr(X, Y) = 0.5. 
+$corr(x,y) = \frac{cov(x,y)}{\sigma_x \sigma_y}$
+
+# 4. R Simulation: Simulate sample data from (i) independent normal, (ii) correlated normal, and (ii) independent skewed (e.g. gamma) distributions. 
+```{r}
+n <- 1000
+norm_samp <- rnorm(n)
+gamma_samp <- rgamma(n, 2)
+```
+
+
+
+## a. For each simulation, compute 1000 samples. For each sample, find a confidence interval for the mean.
+```{r}
+norm_samp.mean <- mean(norm_samp)
+norm_samp.sd <- sd(norm_samp)
+norm_samp.mean + c(-1,1) * (qt(0.95, df=n) * norm_samp.sd / n)
+```
+
+## b. Overall, how well do the confidence intervals work when assumptions are violated?(i.e. compare the coverage from simulations (ii) and (iii) to simulation (i)).
+TODO
+
+# 5. In the Lock5Data package, there are two data sets containing information on random samples of commute times in Atlanta (CommuteAtlanta) and in St. Louis (CommuteStLouis). 
+
+## a. Find the sample size, sample mean, and standard deviation for commute times in each city.
+```{r}
+library(Lock5Data)
+atl.mean <- mean(CommuteAtlanta$Time)
+atl.sd <- sd(CommuteAtlanta$Time)
+atl.n <- length(CommuteAtlanta$Time)
+
+stluis.mean <- mean(CommuteStLouis$Time)
+stluis.sd <- sd(CommuteStLouis$Time)
+stluis.n <- length(CommuteStLouis$Time)
+```
+
+## b. Create a graph of the data for each city. Are there any outliers? Based on the graph and the data itself, determine if it is appropriate to perform inference on this data?
+```{r}
+boxplot(CommuteAtlanta$Time, CommuteStLouis$Time, names=c("Atlanta", "St. Luis"))
+cat("# Atlanta outliers: ", length(CommuteAtlanta$Time[CommuteAtlanta$Time > (atl.mean + 2*atl.sd)]))
+cat("# St. Luis outliers: ", length(CommuteStLouis$Time[CommuteStLouis$Time > (stluis.mean + 2*stluis.sd)]))
+```
+Both cities have some outliers, but less than 4% of either set. From that, the data seems to be well behaved enough to perform inference with.
+
+
+## c. Find and interpret a 95% confidence interval for the difference in commute time between the two cities. Interpret the results in context.
+
+TODO
+
+## d. Conduct a test to determine whether the commute time in Atlanta is longer on average than the commute time in St. Louis. State the hypotheses, test statistic, critical value, and make a formal decision at the alpha = 0.05 level of significance. Show your work for these calculations, then also show how to get the information from built-in functions in R. 
+
+$H_0$ is that there mean(Atlanta commute) = mean(St Pete commute). $H_a$ is mean(Atlanta commute)>mean(St Pete commute). 
+
+## e. Find the p-value for the test in part d. Interpret the p-value in context.
+
+# 6. A statistics student was interested in prices for used Mustang cars being offered for sale on an internet site. He sampled 25 cars from the website; the data are stored in the data set “MustangPrice” in the Lock5Data package.
+
+## a. Suppose we are interested in studying the correlation between Price and Miles for the cars. Describe how you might take one bootstrap sample from this data set. 
+
+We would sample from the set with replacement.
+```{r}
+n_bootstrap <- 10000
+n_cars <- length(MustangPrice$Price)
+
+```
+
+
+
+## b. What is the bootstrap estimate of the standard error?
+
+
+
+## c. Find a 95% bootstrap confidence interval for the correlation. Interpret the interval in context.
+
+## d. Suppose we would like to create a 95% bootstrap confidence interval for the median price of the mustangs. Simulate 1000 bootstrap samples and graph the bootstrap distribution for the sample median price. If appropriate, construct a 95% bootstrap CI for the median price; if not appropriate, explain why.
