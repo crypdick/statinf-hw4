@@ -10,6 +10,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## complete the following problems. Use R for any calculations/simulations. You can use LaTeX for any equations or you may write the equations by hand, scan them in, and include them in your document.
+```{r message=FALSE, cache=FALSE}
+library("mosaic")
+```
 
 # 1. Of the 213 countries or independent economies in the world recognized by the World Bank, 19% are classified by the World Bank as being developed. Are countries with a large land area (>500,000 km2) more likely to be developed? 23% of all countries are large, and 17% of all countries are both large and developed. Use D to denote the event of a country being developed and L to denote a country being large.
 $P(L) = 0.23$
@@ -41,12 +44,35 @@ It would mean that the conditional probability of being developed is totally una
 # 2. A certain river floods every year. Suppose that the low-water mark is set at 1 and the high water mark Y has distribution function $F_Y(y)=P(Y \leq y) =1 - \frac{1}{y^2}, 1 \leq y \leq \infty$
 ## a. Verify that F is a cdf.
 
+For this to be a CDF:
+
+1) the limit of F_Y(y) as y goes to 1 needs to go to 0
+2) the limit of F_Y(y) as y goes to infinity needs to approach 1
+3) F_Y(y) needs to be monotonically increasing.
+
+Plugging in 0 into the equation outputs 0 (satisfying contraint #1), plugging in infinity outputs 1 (satisfying contstraing #2). Finally, there are no discontinuities (since F_Y is a polynomial) and F_Y is always increasing as y is increasing, satisfying constraing #3.
+
 ## b. Find the pdf.
-I do not know how todo this
+$$
+CDF_Y(y) = \int_{-\infty}^y PDF(y)dy \\
+CDF_Y'(y) = PDF(y) \\
+PDF(y) = \frac{d}{dy}1-y^{-2} = 2y^{-3}
+$$
 
 # 3. Suppose X and Y are two random variables with E(X) = 5, Var(X) = 1, E(Y) = 11, Var(Y) = 4. 
 ## a. Find the covariance between X and Y if they are independent.
-TODO don't know
+$$
+cov(x,y) = E[(x-E(x)(y-E(y)))] \\
+= E[xy - xE(y) - yE(x) + E(x)E(y)] \\
+= E[xy] - E[x \mu_y] - E[y \mu_x] + \mu_x \mu_y\\
+= E[xy] - \mu_yE[x ] - \mu_xE[y ] + \mu_x \mu_y\\
+= E[xy] - \mu_yE[x] - \mu_xE[y ] + \mu_x \mu_y\\
+$$
+Since x and y are independent, $E[xy]=E[x]E[y]$:
+$$cov(x,y)= E[x]E[y] - \mu_yE[x] - \mu_xE[y ] + \mu_x \mu_y \\
+= \mu_x \mu_y - \mu_x \mu_y - \mu_x \mu_y + \mu_x \mu_y \\
+=0
+$$
 
 ## b. Find the variance of 2X + 3Y if they are independent.
 $$Var(2x+3Y)=Var(2x)+Var(3y)\\
@@ -54,12 +80,24 @@ $$Var(2x+3Y)=Var(2x)+Var(3y)\\
 =4*1 + 9*4 = 40$$
 
 ## c. Find the covariance between X and Y if corr(X, Y) = 0.5. 
-$corr(x,y) = \frac{cov(x,y)}{\sigma_x \sigma_y}$
+$$corr(x,y) = \frac{cov(x,y)}{\sigma_x \sigma_y}\\
+0.5 = \frac{cov(x,y)}{ 1*4} \\
+cov(x,y) = 2$$
 
 # 4. R Simulation: Simulate sample data from (i) independent normal, (ii) correlated normal, and (ii) independent skewed (e.g. gamma) distributions. 
+
 ```{r}
 n <- 1000
+set.seed(1)
+
+# i.
 norm_samp <- rnorm(n)
+
+# ii. TODO redo with thing from class
+library("mvtnorm")
+mvnorm_samp <- rmvnorm(n, c(0,0), diag(2))
+
+#iii.
 gamma_samp <- rgamma(n, 2)
 ```
 
@@ -71,11 +109,23 @@ norm_samp.mean <- mean(norm_samp)
 norm_samp.sd <- sd(norm_samp)
 norm_samp.mean + c(-1,1) * (qt(0.95, df=n) * norm_samp.sd / n)
 ```
+```{r}
+mvnorm_samp.mean <- mean(mvnorm_samp)
+mvnorm_samp.sd <- sd(mvnorm_samp)
+mvnorm_samp.mean + c(-1,1) * (qt(0.95, df=n) * mvnorm_samp.sd / n)
+```
 
+
+```{r}
+gamma_samp.mean <- mean(gamma_samp)
+gamma_samp.sd <- sd(gamma_samp)
+gamma_samp.mean + c(-1,1) * (qt(0.95, df=n) * gamma_samp.sd / n)
+```
 ## b. Overall, how well do the confidence intervals work when assumptions are violated?(i.e. compare the coverage from simulations (ii) and (iii) to simulation (i)).
-TODO
 
-# 5. In the Lock5Data package, there are two data sets containing information on random samples of commute times in Atlanta (CommuteAtlanta) and in St. Louis (CommuteStLouis). 
+All of the intervals are between 0.0034 and 0.0045 wide. I am pretty sure this means I didn't do this problem correctly.
+
+# 5. In the Lock5Data package, there are two data sets containing information on random samples of commute times in Atlanta (CommuteAtlanta) and in St. Louis (CommuteStLouis).
 
 ## a. Find the sample size, sample mean, and standard deviation for commute times in each city.
 ```{r}
@@ -100,31 +150,97 @@ Both cities have some outliers, but less than 4% of either set. From that, the d
 
 ## c. Find and interpret a 95% confidence interval for the difference in commute time between the two cities. Interpret the results in context.
 
-TODO
+Since both sets have 500 samples, we can compute the difference and then compute the confidence interval for the resulting distribution.
+```{r}
+time_delta <- CommuteAtlanta$Time - CommuteStLouis$Time
+time_delta.n <- length(time_delta)
+time_delta.stddev <- sd(time_delta)
+(time_delta.confints <- mean(time_delta) +c(-1,1)*qnorm(0.975)*time_delta.stddev/sqrt(time_delta.n))
+```
 
-## d. Conduct a test to determine whether the commute time in Atlanta is longer on average than the commute time in St. Louis. State the hypotheses, test statistic, critical value, and make a formal decision at the alpha = 0.05 level of significance. Show your work for these calculations, then also show how to get the information from built-in functions in R. 
 
-$H_0$ is that there mean(Atlanta commute) = mean(St Pete commute). $H_a$ is mean(Atlanta commute)>mean(St Pete commute). 
+## d. Conduct a test to determine whether the commute time in Atlanta is longer on average than the commute time in St. Louis. State the hypotheses, test statistic, critical value, and make a formal decision at the alpha = 0.05 level of significance. Show your work for these calculations, then also show how to get the information from built-in functions in R.
+
+$H_0$ is that there mean(Atlanta commute) = mean(St Pete commute). $H_a$ is mean(Atlanta commute)>mean(St Pete commute). The critical value is 1.96. 
+
+
+```{r}
+mosaic::t.test(CommuteAtlanta$Time, CommuteStLouis$Time, paired=FALSE,var.equal = FALSE, conf.level = 0.95)
+```
+
+The 95% confidence interval is (4.9, 9.3). As this does not include 0, we can reject the null hypothesis.  The units of our commute times are in minutes, therefore the interval can be interpreted as Atlanta having 7.14 more minutes communute time than St Luis residents on average.
+
+The actual means are 29.11 minutes for Atlanta and 21.97 for St Luis.
 
 ## e. Find the p-value for the test in part d. Interpret the p-value in context.
+
+The p-value is 3.4e-10, which is very small. This means that we have a very low chance of this result being chance.
+
 
 # 6. A statistics student was interested in prices for used Mustang cars being offered for sale on an internet site. He sampled 25 cars from the website; the data are stored in the data set “MustangPrice” in the Lock5Data package.
 
 ## a. Suppose we are interested in studying the correlation between Price and Miles for the cars. Describe how you might take one bootstrap sample from this data set. 
 
-We would sample from the set with replacement.
+To make a bootstrap sample of a dataset with $n$ observations, we would sample from the original data $n$ times with replacement.
 ```{r}
 n_bootstrap <- 10000
 n_cars <- length(MustangPrice$Price)
-
+single_bootstrap_sample <- resample(MustangPrice, replace = TRUE)
 ```
 
-
-
 ## b. What is the bootstrap estimate of the standard error?
+
+I am assuming we are interested in the standard error of the mean. For this example, I am treating miles as the independent variable and the price as the response variable.
+```{r}
+B <- 100
+resamples <- matrix(sample(MustangPrice$Price,
+                           n_cars * B,
+                           replace = TRUE),
+                    B, n_cars)
+resampledMeans <- apply(resamples, 1, mean)
+ggplot(data.frame(resampledMeans), aes(resampledMeans)) + geom_density()
+```
+
+```{r}
+(sd(resampledMeans))
+```
 
 
 
 ## c. Find a 95% bootstrap confidence interval for the correlation. Interpret the interval in context.
 
+```{r}
+
+dat <- MustangPrice[, c(2, 3)]
+
+cor.orig <- cor(dat)[1,2]
+cor.boot <- NULL
+
+for (i in 1:B) {
+  idx <- sample.int(n_cars, n_cars, replace = TRUE) 
+  cor.boot[i] <- cor(dat[idx, ])[1,2] 
+}
+ggplot(data.frame(cor.boot), aes(cor.boot)) + geom_density()
+```
+```{r}
+mean(cor.boot) + c(-1,1) * qt(0.95, df=B) * sd(cor.boot) / B
+```
+
+
+
 ## d. Suppose we would like to create a 95% bootstrap confidence interval for the median price of the mustangs. Simulate 1000 bootstrap samples and graph the bootstrap distribution for the sample median price. If appropriate, construct a 95% bootstrap CI for the median price; if not appropriate, explain why.
+
+```{r}
+B <- 1000
+resamples <- matrix(sample(MustangPrice$Price,
+                           n_cars * B,
+                           replace = TRUE),
+                    B, n_cars)
+resampledMedians <- apply(resamples, 1, median)
+mean(resampledMedians) + c(-1,1) * (qt(0.95, df=B) * sd(resampledMedians) / B)
+```
+
+```{r}
+ggplot(data.frame(resampledMedians), aes(resampledMedians)) + geom_density()
+```
+
